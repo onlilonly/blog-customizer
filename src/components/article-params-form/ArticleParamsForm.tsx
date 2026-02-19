@@ -1,6 +1,6 @@
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 
 import { RadioGroup } from 'src/ui/radio-group';
@@ -45,11 +45,25 @@ export const ArticleParamsForm = ({
 		confirmArticleState(formState);
 	};
 
+	const asideRef = useRef<HTMLElement | null>(null);
+	useEffect(()=> {
+		if (!isOpen) return
+		const clickOutside = (e: MouseEvent) => {
+			if (asideRef.current&&!asideRef.current.contains(e.target as Node)) {
+				setIsOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', clickOutside)
+		return () => {
+			document.removeEventListener('mousedown', clickOutside)
+		}
+	},[isOpen])
+
 	return (
 		<>
 			<ArrowButton isOpen={isOpen} onClick={toggleIsOpen} />
 			<aside
-				className={clsx(styles.container, isOpen && styles.container_open)}>
+				className={clsx(styles.container, isOpen && styles.container_open)} ref={asideRef}>
 				<form className={styles.form} onSubmit={submitForm} onReset={resetForm}>
 					<Text as='h2' size={31} weight={800} uppercase>
 						задайте параметры
